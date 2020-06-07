@@ -1,0 +1,37 @@
+{
+  "name": "create-sw-api",
+  "version": "1.0.0",
+  "description": "Automatically generate request api from swagger doc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "create-sw-api": "./bin/cmd",
+    "sw-api": "./bin/cmd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wen-haoming/create-sw-api.git"
+  },
+  "keywords": [
+    "api"
+  ],
+  "author": "haoming-wen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wen-haoming/create-sw-api/issues"
+  },
+  "homepage": "https://github.com/wen-haoming/create-sw-api#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "commander": "^5.1.0",
+    "inquirer": "^7.1.0",
+    "ora": "^4.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2"
+  }
+}
