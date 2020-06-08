@@ -27,7 +27,7 @@ const urlFunc = async (...args) => {
   const res = await Axios.default.get(args[0]);
   spinner.succeed();
   // 写入文件
-  // fs.writeFileSync(resolve('../data/swagger.json'), JSON.stringify(res.data));
+  fs.writeFileSync(resolve('../data/swagger.json'), JSON.stringify(res.data));
 
   const targetPath = resolve('../data/swagger.json');
 
