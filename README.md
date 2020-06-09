@@ -45,9 +45,21 @@ $ sw-api
 
 ## 🔨 Usage
 
+```js
+
+// example
+module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
+    method: '{{method}}',
+    body: {{body}},
+});
+
+`
+
+```
+
 ```bash
        sw-api url  <swagger-api-docs>
 
-       enter your tplName
+       enter your tplNameFile
 ```
 
