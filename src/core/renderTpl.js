@@ -9,22 +9,11 @@ function renderTpl(tplPath, targetPath) {
   const swaggerFile = require(targetPath);
 
   // 1.  先遍历所有tags
-  // const tagsArr = swaggerFile.tags.map((item, idx) => {
-  //   fs.writeFileSync(`${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`);
-  //   return ({
-  //     ...item,
-  //     name: item.name,
-  //     filePath: `${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
-  //     children: [],
-  //   });
-  // });
-  const tagsArr = swaggerFile.tags.map((item) =>
-    // fs.writeFileSync(`${outputPath}/${item.description.slice(0, 5)}.js`);
-    ({
-      ...item,
-      filePath: `${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
-      children: [],
-    }));
+  const tagsArr = swaggerFile.tags.map((item) => ({
+    ...item,
+    filePath: `${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
+    children: [],
+  }));
 
 
   // 2.遍历所有path然后分类
