@@ -9,24 +9,39 @@ function renderTpl(tplPath, targetPath) {
   const swaggerFile = require(targetPath);
 
   // 1.  先遍历所有tags
+  // const tagsArr = swaggerFile.tags.map((item, idx) => {
+  //   fs.writeFileSync(`${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`);
+  //   return ({
+  //     ...item,
+  //     name: item.name,
+  //     filePath: `${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
+  //     children: [],
+  //   });
+  // });
   const tagsArr = swaggerFile.tags.map((item) =>
     // fs.writeFileSync(`${outputPath}/${item.description.slice(0, 5)}.js`);
     ({
       ...item,
-      filePath: `${outputPath}/${item.description.slice(0, 5)}.js`,
+      filePath: `${outputPath}/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
       children: [],
     }));
 
+
   // 2.遍历所有path然后分类
   Object.keys(swaggerFile.paths).forEach((path) => {
-    Object.keys(swaggerFile.paths[path]).forEach((key) => {
-      if (pathKey[key]) {
-        Object.keys(swaggerFile.paths[path][key]).forEach((pathsKey) => {
+    Object.keys(swaggerFile.paths[path]).forEach((method) => {
+      // 一个路径多种请求方法处理 get poset delete put
+      if (pathKey[method]) {
+        Object.keys(swaggerFile.paths[path][method]).forEach((pathsKey) => {
           if (pathsKey === 'tags') {
             tagsArr.forEach((item) => {
-              if (swaggerFile.paths[path][key][pathsKey].includes(item.name)) {
-                swaggerFile.paths[path].path = path;
-                item.children.push(swaggerFile.paths[path]);
+              const obj = {
+              };
+              if (swaggerFile.paths[path][method][pathsKey].includes(item.name)) {
+                // swaggerFile.paths[path].path = path;
+                obj[method] = swaggerFile.paths[path][method];
+                obj.path = path;
+                item.children.push(obj);
               }
             });
           }
@@ -51,12 +66,14 @@ function renderTpl(tplPath, targetPath) {
             if (apiNameArr) {
               let apiName = apiNameArr[1];
               apiName = apiName.replace(/(\/\{.*?\})/g, '');
+              apiName = apiName.replace(/(\/\{.*?\})/g, '');
+              apiName = apiName.replace(/-(\w)/g, ($1, $2) => $2.toUpperCase());
               tempTpl = tempTpl.replace(/\{\{apiname\}\}/g, apiName);
             }
 
             const query = [];
             let body = '{}';
-            const params = [];
+            let params = [];
 
             // 渲染url
             tempTpl = tempTpl.replace(/\{\{url\}\}/g, `\`${pathObj.path}\``);
@@ -78,10 +95,12 @@ function renderTpl(tplPath, targetPath) {
                 }
               });
             }
+            // 如果只有一个参数就一个，多个就用对象接口，没有就没有
+            params = params.length > 0 ? (params.length === 1 ? params.join(',') : `{${params.join(',')}}`) : '';
 
             tempTpl = tempTpl.replace(/\{\{query\}\}/g, query.join(','));
             tempTpl = tempTpl.replace(/\{\{body\}\}/g, body);
-            tempTpl = tempTpl.replace(/\{\{params\}\}/g, `{${params.join(',')}}`);
+            tempTpl = tempTpl.replace(/\{\{params\}\}/g, params);
           }
           renderStr += tempTpl;
         }
@@ -90,7 +109,7 @@ function renderTpl(tplPath, targetPath) {
 
       // renderStr += '\r\n\r\n\r\n';
     });
-    fs.writeFileSync(`${outputPath}/${item.description.slice(0, 5)}.js`, renderStr);
+    fs.writeFileSync(item.filePath, renderStr);
   });
 }
 
