@@ -6,6 +6,7 @@ const ora = require('ora');
 const Inquirer = require('inquirer');
 const renderTpl = require('./renderTpl');
 
+
 const outputPath = process.cwd();
 
 const resolve = (pathName) => path.resolve(__dirname, pathName);
@@ -39,7 +40,8 @@ const urlFunc = async (...args) => {
 
   const tplName = path.join(process.cwd(), tplPath);
   // 根据路径渲染
-  renderTpl(tplName, targetPath);
+  const { outputPath } = renderTpl(tplName, targetPath);
+  console.log('渲染完成', outputPath);
 };
 
 const pathFunc = (...args) => {
