@@ -7,9 +7,9 @@ const { renderComment, renderApiName, renderParamsBodyAndQuery } = require('./re
 
 const outputPath = process.cwd();
 
-function renderTpl(tplPath, targetPath) {
+function renderTpl(tplPath, file) {
   const template = require(tplPath);
-  const swaggerFile = require(targetPath);
+  const swaggerFile = file;
 
   // 1.  先遍历所有tags
   const tagsArr = swaggerFile.tags.map((item) => ({

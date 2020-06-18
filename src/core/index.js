@@ -25,9 +25,9 @@ const urlFunc = async (...args) => {
   const res = await Axios.default.get(args[0]);
   spinner.succeed();
   // 写入文件
-  fs.writeFileSync(resolve('../data/swagger.json'), JSON.stringify(res.data));
+  // fs.writeFileSync(resolve('../data/swagger.json'), );
 
-  const targetPath = resolve('../data/swagger.json');
+  // const targetPath = resolve('../data/swagger.json');
 
   // 目标路径生成文件夹
   // 文件夹名称
@@ -38,7 +38,7 @@ const urlFunc = async (...args) => {
   const tplName = path.join(process.cwd(), tplPath);
   // 根据路径渲染
   try {
-    const { outputPath } = renderTpl(tplName, targetPath);
+    const { outputPath } = renderTpl(tplName, (res.data));
     console.log('渲染完成', outputPath);
   } catch (e) {
     console.log('渲染失败');

@@ -65,9 +65,12 @@ module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}',
 
 ```
 
-```bash
-       sw-api url  <swagger-api-docs>
+## 😄步骤
 
-       enter your tplNameFile
-```
+1. 下载库到本地
+2. 准备模版文件,根据你的项目不一样，编写自己的模板代码
+3. 打开swagger文档，抓去其中一个描述swagger文档的http请求地址path
+4. 输入命令sw-api url path
+5. 输入当前制定的模板路径
+6. 自动生成完毕
 

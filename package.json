@@ -1,6 +1,6 @@
 {
   "name": "create-sw-api",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Automatically generate request api from swagger doc",
   "main": "index.js",
   "scripts": {
