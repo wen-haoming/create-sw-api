@@ -35,8 +35,8 @@ $ sw-api
       help [command]  display help for command
 
     Explames:
-    sw-api url <url>
-    sw-api url <path>
+    sw-api url <api-docs-url>
+    sw-api path <file-path>
 ```
 
 ## 🔨 Usage
@@ -51,13 +51,13 @@ query | get的query参数放在对象里面 |
 body| 如果该方法没有body参数则渲染一个空对象(暂时没想到一个好方案)
 
 ```js
+// example
 // tpl.js
 module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
     method: '{{method}}',
     body: {{body}},
 });
 `
-
 ```
 
 ## 😄 step
