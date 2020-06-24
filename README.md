@@ -18,11 +18,6 @@
     npm install create-sw-api -g
 ```
 
-```bash
-    yarn add create-sw-api -g
-```
-
-
 ## 🖥  Command
 
 ```
@@ -65,12 +60,12 @@ module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}',
 
 ```
 
-## 😄步骤
+## 😄 step
 
-1. 下载库到本地
+1. npm install create-sw-api -g
 2. 准备模版文件,根据你的项目不一样，编写自己的模板代码
-3. 打开swagger文档，抓去其中一个描述swagger文档的http请求地址path
-4. 输入命令sw-api url path
-5. 输入当前制定的模板路径
+3. 谷歌浏览器打开swagger文档地址, 打开调试模式的Network面板，查看其中**api-docs**名称的地址,并且复制下来
+4. 输入命令sw-api url **api-docs**名称的地址
+5. 输入当前制定的模板路径名称
 6. 自动生成完毕
 
