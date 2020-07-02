@@ -7,16 +7,20 @@ const { summaryTpl } = require('../config');
 const { renderComment } = require('./renderFunc/comment');
 const { renderApiName } = require('./renderFunc/apiName');
 const { renderParamsBodyAndQuery } = require('./renderFunc/paramsBody');
+const { headerMsg } = require('./renderFunc/headerMsg');
 
 
 const outputPath = process.cwd();
 
 function renderTpl(tplPath, file) {
   const tpltarget = require(tplPath);
+
   let template = '';
   let header = '';
   let footer = '';
   let mapFileName = [];
+
+  // 判断模板返回是否对象
   if (isObject(tpltarget)) {
     template = tpltarget.template;
     header = tpltarget.header || '';
@@ -64,6 +68,8 @@ function renderTpl(tplPath, file) {
   tagsArr.forEach((item) => {
     let renderStr = '';
     // 渲染头部
+    const headerMsgTpl = headerMsg(swaggerFile, item);
+    renderStr += headerMsgTpl;
     renderStr += header;
     item.children.forEach((pathObj) => {
       // 定义当前模板

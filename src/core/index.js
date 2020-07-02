@@ -3,8 +3,9 @@ const Axios = require('axios');
 const path = require('path');
 const ora = require('ora');
 const Inquirer = require('inquirer');
+const fs = require('fs');
 const renderTpl = require('./renderTpl');
-
+const { deleteFolderRecursive } = require('../utils');
 
 async function getTpl() {
   const { res } = await Inquirer.prompt({
@@ -29,10 +30,11 @@ const urlFunc = async (...args) => {
   const tplName = path.join(process.cwd(), tplPath);
   // 根据路径渲染
   try {
+    deleteFolderRecursive(`${process.cwd()}/api`);
     const { outputPath } = renderTpl(tplName, (res.data));
     console.log('渲染完成', outputPath);
   } catch (e) {
-    console.log('渲染失败');
+    console.log('渲染失败', e);
   }
 };
 
