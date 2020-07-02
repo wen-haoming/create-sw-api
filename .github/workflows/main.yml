@@ -22,7 +22,7 @@ jobs:
       - name: Publish to NPM
         run: npm publish || true
         env:
-          NODE_AUTH_TOKEN: ${{ 44becf59-f59c-4209-9859-d1047f05a45f }}
+          NODE_AUTH_TOKEN: 44becf59-f59c-4209-9859-d1047f05a45f
 
 #  publish-to-gpr:
 #    runs-on: ubuntu-latest
