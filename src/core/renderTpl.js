@@ -1,15 +1,33 @@
 const fs = require('fs');
 const { pathKey, pathKeyArr } = require('../config/index');
-const { ReplaceStr } = require('../utils');
+const { ReplaceStr, isObject } = require('../utils');
 const { summaryTpl } = require('../config');
-// const PathKey =
-const { renderComment, renderApiName, renderParamsBodyAndQuery } = require('./renderFunc/comment');
+
+
+const { renderComment } = require('./renderFunc/comment');
+const { renderApiName } = require('./renderFunc/apiName');
+const { renderParamsBodyAndQuery } = require('./renderFunc/paramsBody');
+
 
 const outputPath = process.cwd();
 
 function renderTpl(tplPath, file) {
-  const template = require(tplPath);
-  const swaggerFile = file;
+  const tpltarget = require(tplPath);
+  let template = '';
+  let header = '';
+  let footer = '';
+
+  if (isObject(tpltarget)) {
+    template = tpltarget.template;
+    header = tpltarget.header || '';
+    footer = tpltarget.footer || '';
+  } else if (typeof tpltarget === 'string') {
+    template = tpltarget;
+  } else {
+    throw new Error('输入文件格式错误');
+  }
+
+  const swaggerFile = file; // swagger数据对象
 
   // 1.  先遍历所有tags
   const tagsArr = swaggerFile.tags.map((item) => ({
@@ -44,6 +62,7 @@ function renderTpl(tplPath, file) {
   // 3. 遍历方法
   tagsArr.forEach((item) => {
     let renderStr = '';
+    renderStr += header;
     item.children.forEach((pathObj) => {
       // 定义当前模板
       const tempTpl = new ReplaceStr(summaryTpl + template);
@@ -79,6 +98,7 @@ function renderTpl(tplPath, file) {
     if (!exit) {
       fs.mkdirSync(`${outputPath}/api`);
     }
+    renderStr += footer;
     fs.writeFileSync(item.filePath, renderStr);
   });
 
