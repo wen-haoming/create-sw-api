@@ -16,11 +16,12 @@ function renderTpl(tplPath, file) {
   let template = '';
   let header = '';
   let footer = '';
-
+  let mapFileName = [];
   if (isObject(tpltarget)) {
     template = tpltarget.template;
     header = tpltarget.header || '';
     footer = tpltarget.footer || '';
+    mapFileName = tpltarget.mapFileName || [];
   } else if (typeof tpltarget === 'string') {
     template = tpltarget;
   } else {
@@ -30,9 +31,9 @@ function renderTpl(tplPath, file) {
   const swaggerFile = file; // swagger数据对象
 
   // 1.  先遍历所有tags
-  const tagsArr = swaggerFile.tags.map((item) => ({
+  const tagsArr = swaggerFile.tags.map((item, index) => ({
     ...item,
-    filePath: `${outputPath}/api/${item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
+    filePath: `${outputPath}/api/${mapFileName[index] ? mapFileName[index] : item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase())}.js`,
     children: [],
   }));
 
@@ -62,6 +63,7 @@ function renderTpl(tplPath, file) {
   // 3. 遍历方法
   tagsArr.forEach((item) => {
     let renderStr = '';
+    // 渲染头部
     renderStr += header;
     item.children.forEach((pathObj) => {
       // 定义当前模板
@@ -98,6 +100,7 @@ function renderTpl(tplPath, file) {
     if (!exit) {
       fs.mkdirSync(`${outputPath}/api`);
     }
+    // 渲染尾部
     renderStr += footer;
     fs.writeFileSync(item.filePath, renderStr);
   });

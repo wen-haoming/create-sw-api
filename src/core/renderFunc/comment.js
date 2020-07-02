@@ -43,7 +43,7 @@ function renderComment(pathObj, typeKey) {
     }
   });
   summaryTempTpl = summaryTempTpl.replace(/[\r\n]$/, ''); // 匹配最后一个换行
-  return commentTpl(`${summaryTempTpl}`).replace(/\{\{summary\}\}/, pathObj[typeKey].summary);
+  return commentTpl(`${summaryTempTpl}` || '*').replace(/\{\{summary\}\}/, pathObj[typeKey].summary);
 }
 
 
