@@ -3,4 +3,4 @@ module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}',
     method: '{{method}}',
     body: {{body}},
 });
-`
+`;
