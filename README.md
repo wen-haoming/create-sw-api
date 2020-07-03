@@ -96,7 +96,7 @@ module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}',
 ![](https://cdn.nlark.com/yuque/0/2020/png/276215/1593678884271-df148114-2927-4bfa-bcdb-1d8ba2c28132.png?x-oss-process=image%2Fresize%2Cw_1450)
 
 
-## 📝高级用法
+## 📝Advanced usage
 模板文件除了默认返回字符串模板,还能返回一个对象。
 
 ```js
