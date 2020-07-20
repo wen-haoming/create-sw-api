@@ -13,6 +13,8 @@ const headerMsgTpl = `
  
  `;
 
+
+
 const headerMsg = (swaggerFile, item) => {
   const tpl = new ReplaceStr(headerMsgTpl);
   tpl.replace(/{{title}}/g, item.name);
@@ -27,4 +29,5 @@ const headerMsg = (swaggerFile, item) => {
 
 module.exports = {
   headerMsg,
+  
 };

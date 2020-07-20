@@ -15,7 +15,6 @@ const mapActions = {
   },
 };
 
-
 module.exports = {
   mapActions,
 };
