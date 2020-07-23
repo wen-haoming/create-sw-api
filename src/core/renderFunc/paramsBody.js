@@ -18,6 +18,7 @@ function renderParamsBodyAndQuery(pathObj, typeKey, tempTpl, exportName,paramIte
   let params = [];
   let paramsLength = 0
   let queryLength = 0
+
   tempTpl.replace(/'`|`'/g, '`');
 
   tempTpl.replace(/\/\{(.+?)\}/g, ($1, $2) => {
@@ -57,10 +58,8 @@ function renderParamsBodyAndQuery(pathObj, typeKey, tempTpl, exportName,paramIte
   //  }else if((paramsLength === 1)&& paramItem ){
   //    console.log(paramItem,'--------');
   //    params+= `${paramItem.required?"":'?'}:${paramItem.type}`
-    
   //  }
   }
- 
   
   return {
     query: query.join(','),

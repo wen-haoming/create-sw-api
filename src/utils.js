@@ -53,10 +53,11 @@ function deleteFolderRecursive(path) {
   }
 }
 
-// 递归解析
+// import key  递归解析
 function deepRenderTypeProps(definitions, typesPropsTplItem, tempStr, tarKey) {
   Object.keys(definitions[tarKey].properties).forEach((key) => {
     tempStr += typesPropsTplItem.replace(/\{\{typesPropsTplKey\}\}/g, key);
+
     if (definitions[tarKey].properties[key].type === "array") {
         if(definitions[tarKey].properties[key].items&&definitions[tarKey].properties[key].items.$ref){
           let schemaKey =  ((definitions[tarKey].properties[key].items.$ref).match(/.*\/(.*?)$/)[1])
@@ -91,8 +92,34 @@ let mapMethodKey = {
   string: "string",
   boolean: "boolean",
   integer: "number",
-  number:'number'
+  number:'number',
+  "int64":"number"
 };
+
+function deepRenderReturnTypes(definitions,typesPropsTplItem,tarKey,tempStr){
+   let tarVal =  definitions[tarKey]
+    if(tarVal.type === 'object'&&tarVal.properties){
+       Object.keys(tarVal.properties).forEach(key=>{
+
+          tempStr += typesPropsTplItem;
+          tempStr = tempStr.replace(/\{\{typesPropsTplKey\}\}/g,key)
+          tempStr = tempStr.replace(/\{\{comment\}\}/g,tarVal.properties[key]['description']||'')
+
+           if(tarVal.properties[key]&& tarVal.properties[key]['$ref']){
+            tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g,`{${deepRenderReturnTypes(definitions,typesPropsTplItem, tarVal.properties[key]['$ref'].match(/.*\/(.*?)$/)[1],'')}}` )
+           }else if(tarVal.properties[key]['type'] === 'object'){
+            tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, 'any' )
+           }else if(tarVal.properties[key]['type'] === 'array'){
+            tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, `Array<${mapMethodKey[tarVal.properties[key].items.type]}>` )
+           }else {
+            tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, mapMethodKey[tarVal.properties[key]['type']] )
+           }
+       })
+       return tempStr
+    }else{
+        return tempStr
+    }
+}
 
 module.exports = {
   paseName,
@@ -102,4 +129,5 @@ module.exports = {
   deleteFolderRecursive,
   mapMethodKey,
   deepRenderTypeProps,
+  deepRenderReturnTypes
 };

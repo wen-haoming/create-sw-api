@@ -7,7 +7,7 @@ const { renderComment } = require('./renderFunc/comment');
 const { renderApiName } = require('./renderFunc/apiName');
 const { renderParamsBodyAndQuery } = require('./renderFunc/paramsBody');
 const { headerMsg } = require('./renderFunc/headerMsg');
-const {getTypesImportTpl,renderTypesProps}  = require('./renderFunc/renderTs');
+const {getTypesImportTpl,renderTypesProps,renderReturnTypes}  = require('./renderFunc/renderTs');
 
 const outputPath = process.cwd();
 
@@ -48,6 +48,7 @@ function renderTpl(tplPath, file) {
     casePath:isRenderTypescript? CasePath:'', // 判断是否ts模式
     isTypescript:isRenderTypescript,
     tsTypeTempArr:[], // tsType引入的数组
+    tsReturnTypeArr:[], // ts返回值数组
     children: [],
   })});
 
@@ -85,12 +86,14 @@ function renderTpl(tplPath, file) {
     renderStr += headerMsgTpl;
     // 如果是ts模式的话 首先需要添加渲染模板的标记, 然后添加所有类型名称到一个数据结构，后续需要筛选再渲染到 tsimportTpl 上
     if(item.isTypescript){
+      renderStr+=`import {AxiosResponse} from 'axios'\r\n`
       renderStr += `{{tsimportTpl}}
       `
       item.children.forEach((pathObj) => {
         Object.keys(pathObj).forEach((typeKey) => {
           if (pathKeyArr.includes(typeKey)) {
             item.tsTypeTempArr.push(renderApiName(pathObj, typeKey)+'Props')
+            item.tsReturnTypeArr.push(renderApiName(pathObj, typeKey)+'ReturnTypes')
           }
         })
       })
@@ -102,6 +105,11 @@ function renderTpl(tplPath, file) {
       Object.keys(pathObj).forEach((typeKey,) => {
         if (pathKeyArr.includes(typeKey)) {
           if (pathObj[typeKey]) {
+
+            if(isRenderTypescript){
+               tempTpl.replace(/\(\{\{params\}\}\)/g,`({{params}}):Promise<AxiosResponse<${item.tsReturnTypeArr[idx]}>>`)
+            }
+
             // 渲染基本注释
             tempTpl.replace(/\{\{summary\}\}/g, renderComment(pathObj, typeKey));
 
@@ -109,7 +117,7 @@ function renderTpl(tplPath, file) {
             tempTpl.replace(/\{\{method\}\}/g, typeKey);
 
             // 渲染apiname
-            tempTpl.replace(/\{\{apiname\}\}/g, renderApiName(pathObj, typeKey));
+            tempTpl.replace(/\{\{apiname\}\}/g, renderApiName(pathObj, typeKey,isRenderTypescript ?item.tsReturnTypeArr[idx]:''));
 
             // 渲染url
             tempTpl.replace(/\{\{url\}\}/g, `\`${pathObj.path}\``);
@@ -129,6 +137,7 @@ function renderTpl(tplPath, file) {
             if(isRenderTypescript && item.tsTypeTempArr&& item.tsTypeTempArr.length>0){
               // 渲染types.ts文件
                 renderTypeStr += renderTypesProps(item.tsTypeTempArr[idx], pathObj[typeKey].parameters,definitions)
+                renderTypeStr += renderReturnTypes(item.tsReturnTypeArr[idx], pathObj[typeKey].responses,definitions)
             }
           }
           renderStr += tempTpl.toStr();

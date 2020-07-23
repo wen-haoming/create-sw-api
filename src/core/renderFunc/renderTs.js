@@ -1,17 +1,19 @@
-const { ReplaceStr, mapMethodKey,deepRenderTypeProps } = require("../../utils");
+const { ReplaceStr, mapMethodKey,deepRenderTypeProps,deepRenderReturnTypes } = require("../../utils");
 const typesImportTpl = `import {{{TypesImportTpl}}} from './types'
 `;
 
 const typesPropsTpl = `export interface {{typesPropsName}} {
 {{typesPropsTplItem}}
 }
+
 `;
 
 const typesPropsTplItem = `{{typesPropsTplKey}}:{{typesPropsTplVal}}; //{{comment}}
 `;
 
 function getTypesImportTpl(item) {
-  let tempStr = item.tsTypeTempArr.join(",");
+  let tempStr = item.tsTypeTempArr.concat(item.tsReturnTypeArr).join(",");
+  
   return typesImportTpl.replace(/\{\{TypesImportTpl\}\}/g, tempStr);
 }
 
@@ -50,7 +52,6 @@ function renderTypesProps(exportName, paramsArr,definitions) {
               );
         }
         tempTypesPropsTplItem +=  tempStr 
-       
     })
     renderStr.replace(/\{\{typesPropsTplItem\}\}/g, tempTypesPropsTplItem);
     return renderStr.toStr();
@@ -59,8 +60,37 @@ function renderTypesProps(exportName, paramsArr,definitions) {
   }
 }
 
+function renderReturnTypes(exportName, responses,definitions){
+  if(responses){
+    let renderStr = new ReplaceStr(typesPropsTpl);
+    renderStr.replace(/\{\{typesPropsName\}\}/, exportName);
+   
+    let tarKey = responses['200']&&responses['200']['schema']&&responses['200']['schema']['$ref']
+
+    if(tarKey){
+     let  tempTypesPropsTplItem = ''
+
+     tempTypesPropsTplItem = deepRenderReturnTypes(definitions,typesPropsTplItem,tarKey.match(/.*\/(.*?)$/)[1],tempTypesPropsTplItem)
+
+      renderStr.replace(/\{\{typesPropsTplItem\}\}/g, tempTypesPropsTplItem);
+
+    }else{
+      renderStr.replace(/\{\{typesPropsTplItem\}\}/g, '');
+    }
+    return renderStr.toStr()
+
+  }else{
+    return ''
+
+  }
+
+}
+
+
+
 module.exports = {
   typesImportTpl,
   getTypesImportTpl,
   renderTypesProps,
+  renderReturnTypes,
 };
