@@ -1,16 +1,34 @@
-const program = require('commander');
-const { mapActions } = require('./actions');
+const { Command } = require('commander');
+
+const { mapActions ,defaultAction} = require('./actions');
 
 const { version } = require('./constants');
 
-Reflect.ownKeys(mapActions).forEach((key) => {
-  program.command(key)
-    .alias(mapActions[key].alias)
-    .description(mapActions[key].description)
-    .action(() => {
-      mapActions[key].action(...process.argv.slice(3));
-    });
-});
+const program = new Command();
+
+if(process.argv.length <= 2 ){
+  defaultAction()
+  return 
+}
+
+Reflect.ownKeys(mapActions).reduce((program,key)=>{
+  let{option} =  mapActions[key]
+  let [o1,o2] = option;
+  program.option(o1,o2)
+  return program
+},program)
+
+// 解析所有
+program.parse(process.argv);
+
+Reflect.ownKeys(mapActions).forEach(key=>{
+  (()=>{
+    let{action} =  mapActions[key]
+    if(program[key]){
+      action(process.argv)
+    }
+  })()
+})
 
 // 监听用户事件
 program.on('--help', () => {

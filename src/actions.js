@@ -1,20 +1,23 @@
-const { urlFunc, pathFunc } = require('./core/index');
+const { urlFunc, pathFunc,defaultAction } = require('./core/index');
+
+
+
+// .option('-c, --cheese <type>', 'Add the specified type of cheese', 'blue');
 
 const mapActions = {
-  url: {
-    alias: 'u',
-    description: 'Please enter your <swagger-api-doc>',
-    action: urlFunc,
-    example: ['sw-api url <url>'],
-  },
-  path: {
-    alias: 'p',
-    description: 'Please enter your <swagger-api-doc>',
-    action: pathFunc,
-    example: ['sw-api url <path>'],
+  // url: {
+  //   action: urlFunc,
+  //   option:['-u, --url','Please enter your url'],
+  // },
+  config:{
+    option:['-c, --config','Please enter the path of <sw.config.js>'],
+    action:defaultAction
   },
 };
 
+
+
 module.exports = {
   mapActions,
+  defaultAction
 };

@@ -9,10 +9,8 @@ const { renderParamsBodyAndQuery } = require('./renderFunc/paramsBody');
 const { headerMsg } = require('./renderFunc/headerMsg');
 const {getTypesImportTpl,renderTypesProps,renderReturnTypes}  = require('./renderFunc/renderTs');
 
-const outputPath = process.cwd();
 
-function renderTpl(tplPath, file) {
-  const tpltarget = require(tplPath);
+function renderTpl(swconfig, swaggerFile) {
 
   let template = '';
   let header = '';
@@ -20,22 +18,27 @@ function renderTpl(tplPath, file) {
   let isRenderTypescript = false;
   let definitions = {}; // swagger的类型定义集合
   let mapFileName = [];
+  const outputPath = swconfig.output?
+                    swconfig.output.path?
+                    swconfig.output.path:
+                    process.cwd()+'/api'
+                    :process.cwd()+'/api';
   
   // 判断模板返回是否对象
-  if (isObject(tpltarget)) {
-    template = tpltarget.template;
-    header = tpltarget.header || '';
-    footer = tpltarget.footer || '';
-    isRenderTypescript = tpltarget.typescript || false;
-    mapFileName = tpltarget.mapFileName || [];
+  if (isObject(swconfig)) {
+    template = swconfig.template;
+    header = swconfig.header || '';
+    footer = swconfig.footer || '';
+    isRenderTypescript = swconfig.typescript || false;
+    mapFileName = swconfig.mapFileName || [];
 
-  } else if (typeof tpltarget === 'string') {
-    template = tpltarget;
+  } else if (typeof swconfig === 'string') {
+    template = swconfig;
   } else {
     throw new Error('输入文件格式错误');
   }
 
-  const swaggerFile = file; // swagger数据对象
+
   definitions = swaggerFile.definitions;
 
   // 1.  先遍历所有tags
@@ -43,8 +46,8 @@ function renderTpl(tplPath, file) {
     let CasePath =  (mapFileName[index] ? mapFileName[index] : item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase()))
     return ({
     ...item,
-    filePath: `${outputPath}/api/${isRenderTypescript?CasePath+'/index':CasePath}.${isRenderTypescript?'ts':'js'}`,
-    tsTypePath:`${outputPath}/api/${CasePath+'/types'}.ts`,
+    filePath: `${outputPath}/${isRenderTypescript?CasePath+'/index':CasePath}.${isRenderTypescript?'ts':'js'}`,
+    tsTypePath:`${outputPath}/${CasePath+'/types'}.ts`,
     casePath:isRenderTypescript? CasePath:'', // 判断是否ts模式
     isTypescript:isRenderTypescript,
     tsTypeTempArr:[], // tsType引入的数组
@@ -144,15 +147,16 @@ function renderTpl(tplPath, file) {
         }
       });
     });
-    const exit = fs.existsSync(`${outputPath}/api`);
+
+    const exit = fs.existsSync(`${outputPath}`);
 
     if (!exit) {
-      fs.mkdirSync(`${outputPath}/api`);
+      fs.mkdirSync(`${outputPath}`);
     }
     // 渲染ts的模式
     if(isRenderTypescript){
       renderStr = renderStr.replace(/\{\{tsimportTpl\}\}/g,getTypesImportTpl(item))
-      fs.mkdirSync(`${outputPath}/api/${item.casePath}`);
+      fs.mkdirSync(`${outputPath}/${item.casePath}`);
       fs.writeFileSync(item.tsTypePath, renderTypeStr);
     }
    
@@ -162,7 +166,7 @@ function renderTpl(tplPath, file) {
   });
 
   return {
-    outputPath: `${outputPath}/api`,
+    outputPath: `${outputPath}`,
   };
 }
 

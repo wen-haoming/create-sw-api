@@ -1,49 +1,64 @@
+const Axios = require("axios");
+const path = require("path");
+const ora = require("ora");
+const Inquirer = require("inquirer");
+const fs = require("fs");
+const renderTpl = require("./renderTpl");
+const { deleteFolderRecursive ,consoleError,consoleSuccess} = require("../utils");
+var ProgressBar = require("progress");
+const { error } = require("console");
 
-const Axios = require('axios');
-const path = require('path');
-const ora = require('ora');
-const Inquirer = require('inquirer');
-const fs = require('fs');
-const renderTpl = require('./renderTpl');
-const { deleteFolderRecursive } = require('../utils');
+var bar = new ProgressBar(":bar :current/:total", { total: 15 });
 
-async function getTpl() {
-  const { res } = await Inquirer.prompt({
-    type: 'input',
-    name: 'res',
-    message: 'please enter your func-api template name',
-  });
-  return res;
-}
+// async function getTpl() {
+//   const { res } = await Inquirer.prompt({
+//     type: 'input',
+//     name: 'res',
+//     message: 'please enter your func-api template name',
+//   });
+//   return res;
+// }
 
-const urlFunc = async (...args) => {
-  const spinner = ora('featching swagger doc...');
+const renderFunc = async (swConfig) => {
+  const spinner = ora("featching swagger doc...\r\n");
   spinner.start();
-  // 请求
-  const res = await Axios.default.get(args[0]);
-  spinner.succeed();
+  let res = ''
+  try{
+    res = await Axios.default.get(swConfig.entry);
+  }catch(e){
+    spinner.succeed();
+    consoleError('Request failed','entry must be the correct swagger-doc-api')
+    return 
+  }
 
-  // 目标路径生成文件夹
   // 文件夹名称
-  const tplPath = await getTpl();
-
-  const tplName = path.join(process.cwd(), tplPath);
   // 根据路径渲染
   try {
+    spinner.succeed();
     deleteFolderRecursive(`${process.cwd()}/api`);
-    const { outputPath } = renderTpl(tplName, (res.data));
-    console.log('渲染完成', outputPath);
+    const { outputPath } = renderTpl(swConfig, res.data);
+    consoleSuccess('Compiled successfully','\r\npath:'+'\033[40;32m'+outputPath)
   } catch (e) {
-    console.log('渲染失败', e);
+    consoleError('Compilation failed',e)
   }
 };
 
-const pathFunc = () => {
-  console.log('暂时不满足路径功能', process.cwd());
+const defaultAction = async (args = []) => {
+  let [, , , filePath] = args;
+  // 如果用户填入配置文件的路径则走默认文件名 /sw.config.js
+  if (filePath) {
+    filePath = process.cwd() + "/" + filePath;
+  }
+  let swConfig = require(filePath);
+
+  renderFunc(swConfig);
 };
 
+const pathFunc = () => {
+  console.log("暂时不满足路径功能", process.cwd());
+};
 
 module.exports = {
-  urlFunc,
   pathFunc,
+  defaultAction,
 };

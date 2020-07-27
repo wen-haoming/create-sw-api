@@ -96,6 +96,7 @@ let mapMethodKey = {
   "int64":"number"
 };
 
+
 function deepRenderReturnTypes(definitions,typesPropsTplItem,tarKey,tempStr){
    let tarVal =  definitions[tarKey]
     if(tarVal.type === 'object'&&tarVal.properties){
@@ -109,9 +110,11 @@ function deepRenderReturnTypes(definitions,typesPropsTplItem,tarKey,tempStr){
             tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g,`{${deepRenderReturnTypes(definitions,typesPropsTplItem, tarVal.properties[key]['$ref'].match(/.*\/(.*?)$/)[1],'')}}` )
            }else if(tarVal.properties[key]['type'] === 'object'){
             tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, 'any' )
-           }else if(tarVal.properties[key]['type'] === 'array'){
+           }else if(tarVal.properties[key]['type'] === 'array' && !tarVal.properties[key]['items']){
             tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, `Array<${mapMethodKey[tarVal.properties[key].items.type]}>` )
-           }else {
+           }else if(tarVal.properties[key]['type'] === 'array' && tarVal.properties[key]['items']&& tarVal.properties[key]['items']['$ref']){
+             tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, `Array<{${deepRenderReturnTypes(definitions,typesPropsTplItem, tarVal.properties[key]['items']['$ref'].match(/.*\/(.*?)$/)[1],'')}}>` )
+           } else {
             tempStr = tempStr.replace(/\{\{typesPropsTplVal\}\}/g, mapMethodKey[tarVal.properties[key]['type']] )
            }
        })
@@ -119,6 +122,13 @@ function deepRenderReturnTypes(definitions,typesPropsTplItem,tarKey,tempStr){
     }else{
         return tempStr
     }
+}
+
+function consoleError(title,...args){
+  console.log("\033[41;30m DONE \033[41;41m  "+title, '\033[0m','\r\n',...args);
+}
+function consoleSuccess(title,...args){
+  console.log("\033[42;30m DONE \033[40;32m  "+title, '\033[0m','\r\n',...args);
 }
 
 module.exports = {
@@ -129,5 +139,7 @@ module.exports = {
   deleteFolderRecursive,
   mapMethodKey,
   deepRenderTypeProps,
-  deepRenderReturnTypes
+  deepRenderReturnTypes,
+  consoleError,
+  consoleSuccess
 };
