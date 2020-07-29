@@ -1,121 +1,144 @@
-<h1 align="center">create-sw-api</h1>
+# create-sw-api
 
-<div >能够将swagger文档一键转化成前端需要的请求api方法</div>
+## 🙋‍♂️why？
 
-<br/>
+1. 你是否曾经遇到过**swagger**文档上有**上百个接口**，然后你要每一个自己**手写**出来, 效率和正确率大幅下降。 现在你只需要工具一键生成所有的axios接口～
+1. **typescript**的项目里**axios**的返回数据通常都难以定义，但是现在工具能够帮你**完整生成类型推导**！
 
-![](https://cdn.nlark.com/yuque/0/2020/png/276215/1592412249023-1a047b04-f311-4223-9f02-e70ade3c6500.png?x-oss-process=image%2Fresize%2Cw_651)
+
+
+![image.png](https://cdn.nlark.com/yuque/0/2020/png/276215/1595924490964-944d06da-16a1-4baf-b673-0752e6f6f2b2.png#align=left&display=inline&height=256&margin=%5Bobject%20Object%5D&name=image.png&originHeight=512&originWidth=1776&size=127737&status=done&style=none&width=888)
+![image.png](https://cdn.nlark.com/yuque/0/2020/png/276215/1595924461701-a4596403-2954-45f9-973d-91d9016f3cda.png#align=left&display=inline&height=232&margin=%5Bobject%20Object%5D&name=image.png&originHeight=464&originWidth=940&size=47344&status=done&style=none&width=470)
 
 ## ✨ Features
 
-- 简单易用，一键转化
-- 模板支持，易用扩展
+- 只需要一个配置文件，方便项目迁移
+- 模板支持，接口风格自由定义
 - 注释生成, 容易辨识
+- **生成typescript**的类型推导
 
 ## 📦 Install
 
+
 ```bash
-    npm install create-sw-api -g
+npm install create-sw-api -D
 ```
 
-## 🖥  Command
 
+## 🖥  Command
+
+
+```bash
+Usage: sw-api [options]
+
+Options:
+  -c, --config  Please enter the path of <sw.config.js>
+  -h, --help    display help for command
 ```
-$ sw-api
 
-    Usage: sw-api [options] [command]
-
-    Options:
-      -V, --version   output the version number 
-      -h, --help      display help for command
-
-    Commands:
-      url           resolve url
-      path          resolve path
-      help [command]  display help for command
-
-    Explames:
-    sw-api url <api-docs-url>
-    sw-api path <file-path>
-```
 
 ## 🔨 Usage
 
-模板变量名 | 含义
--|-
- apiname | 最后生成的api名称 |
-params | 解构出来的参数<b>对象</b> |
-method | 方法名称比如get,post等 | 
-url | url |
-query | get的query参数放在对象里面 |
-body| 如果该方法没有body参数则渲染一个空对象 (暂时没想到一个好方案)
 
-```js
-// example
-// tpl.js
-module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
-    method: '{{method}}',
-    body: {{body}},
+1.  下载完成后，我们需要在项目的根目录建立一个配置文件，默认名称叫 **sw.config.js **的配置文件,执行命令sw-api能够自动执行该文件, 当然你也可以自由命名 sw-api --config xxx。
+
+
+
+2. 配置文件编写
+
+```json
+// 定义模板
+let tpl = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
+  method: '{{method}}',
+  body: {{body}},
 });
 `
-```
 
-## 😄 step
-
-1. 全局下载。
-
-```bash
-   npm install create-sw-api -g
-```
-2. 准备模版文件,根据你的项目不一样，编写自己的模板代码
-
-```js
-  // example
-  // tpl.js
-  module.exports = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
-      method: '{{method}}',
-      body: {{body}},
-  });
-  `
-```
-
-3. 谷歌浏览器打开swagger文档地址, 打开调试模式的Network面板，查看其中**api-docs**名称的地址,并且复制下来
-
-![](https://cdn.nlark.com/yuque/0/2020/png/276215/1593682144374-c15d3885-88ef-4859-9251-673c998ff165.png)
-
-4. 输入命令sw-api url **api-docs**名称的地址
-
-```bash
-  sw-api url <api-docs>
-```
-
-5. 按要求输入当前制定的模板路径名称
-
-6. 自动生成完毕😄
-
-![](https://cdn.nlark.com/yuque/0/2020/png/276215/1593678884271-df148114-2927-4bfa-bcdb-1d8ba2c28132.png?x-oss-process=image%2Fresize%2Cw_1450)
-
-
-## 📝Advanced usage
-模板文件除了默认返回字符串模板,还能返回一个对象。
-
-```js
 module.exports = {
-  template:``,
-  header:`import {request} from './api'`,
-  mapFileName:['error','yizhangtu','xialaguanli','jidu']
+    // entry 是swagger的一个叫api-doc的接口，可以从浏览器的网络面板中查看
+    entry:"http://xxxxxx/api-docs",
+    template:tpl, // 渲染的模板
+    header:`import request from  '../../request'`, // 该文件需要引入的模块
+    typescript: true, // 是否支持ts
 }
 ```
 
-参数名称 | 含义
--|-
- template | 模板字符串 |
-header | 渲染模板的头部 |
-footer | 渲染模板的尾部 |
-mapFileName | 文件名称渲染映射 |
+3. ** **配置package.json里面script的字段 比如:  
+
+```json
+"scripts": {
+    "api":"sw-api " // or  "api": "sw-api --config xxx.js" 执行指定对应配置文件
+  },
+```
+
+4.  直接输入 **npm run api** 即可
+
+
+
+### template模板变量名称
+
+
+使用的是与vue类似的模板语法的来定义
+
+
+
+| 模板变量名 | 含义                                                         |
+| ---------- | ------------------------------------------------------------ |
+| apiname    | 最后生成的api名称                                            |
+| params     | 解构出来的参数**对象**                                       |
+| method     | 方法名称比如get,post等                                       |
+| url        | url                                                          |
+| query      | get的query参数放在对象里面                                   |
+| body       | 如果该方法没有body参数则渲染一个空对象 (暂时没想到一个好方案) |
+
+
+
+
+
+
+
+## 📝Advanced usage
+
+
+```javascript
+module.exports = {
+    // entry 是swagger的一个叫api-doc的接口，可以从浏览器的网络面板中查看
+    entry:"http://icity-dev.cloud.cityworks.cn/api/sheshijianguan/v2/api-docs",
+    template:tpl, // 渲染的模板
+ 
+    header:`import request from  '../../request'`, // 每个文件中引入的模块
+    typescript: true, // 是否支持ts
+    output:{
+      path:('./apitest')
+    },
+    filterName:{
+      1:'map',
+      2:'Controller',
+      3:'Check'
+    },
+    isAxiosTypes:false, 
+}
+```
+
+
+
+| 参数名称     | 类型    | 含义                                                       |
+| ------------ | ------- | ---------------------------------------------------------- |
+| entry        | stirng  | swagger的一个叫api-doc的接口，可以从浏览器的网络面板中查看 |
+| template     | string  | 模板字符串                                                 |
+| header       | string  | string 渲染模板的头部                                      |
+| footer       | string  | string  渲染模板的尾部                                     |
+| typescript   | boolean | 是否支持ts                                                 |
+| filterName   | object  | 对应名称的映射                                             |
+| isAxiosTypes | boolean | typescript 模式下 是否支持直接返回axios类型                |
+
+
 
 ## 😘Q&A
 
+
 #### 1. 默认渲染的文件名称太长了有什么方法呢？
 
-请参考高级用法的mapFileName参数,默认是按照swagger的顺序映射的，如果没有映射到的就采取默认的策略。
+
+请参考高级用法的 filterName 参数,默认是按照swagger的顺序映射的，key为swagger对应的类别的索引,value为映射名称。
+

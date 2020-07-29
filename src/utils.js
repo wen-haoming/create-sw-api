@@ -131,6 +131,24 @@ function consoleSuccess(title,...args){
   console.log("\033[42;30m DONE \033[40;32m  "+title, '\033[0m','\r\n',...args);
 }
 
+
+function deleteFolder(path) {
+    let files = [];
+    if( fs.existsSync(path) ) {
+        files = fs.readdirSync(path);
+        files.forEach(function(file,index){
+            let curPath = path + "/" + file;
+            if(fs.statSync(curPath).isDirectory()) {
+                deleteFolder(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+    }
+  }
+
+
 module.exports = {
   paseName,
   ReplaceStr,
@@ -141,5 +159,6 @@ module.exports = {
   deepRenderTypeProps,
   deepRenderReturnTypes,
   consoleError,
-  consoleSuccess
+  consoleSuccess,
+  deleteFolder
 };

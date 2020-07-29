@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { pathKey, pathKeyArr } = require('../config/index');
-const { ReplaceStr, isObject } = require('../utils');
+const { ReplaceStr, isObject ,deleteFolder} = require('../utils');
 const { summaryTpl } = require('../config');
 
 const { renderComment } = require('./renderFunc/comment');
@@ -18,11 +18,15 @@ function renderTpl(swconfig, swaggerFile) {
   let isRenderTypescript = false;
   let definitions = {}; // swagger的类型定义集合
   let mapFileName = [];
+  let filterName = {};
+  let isAxiosTypes = false;
   const outputPath = swconfig.output?
                     swconfig.output.path?
                     swconfig.output.path:
                     process.cwd()+'/api'
                     :process.cwd()+'/api';
+
+  deleteFolder(outputPath);
   
   // 判断模板返回是否对象
   if (isObject(swconfig)) {
@@ -31,6 +35,7 @@ function renderTpl(swconfig, swaggerFile) {
     footer = swconfig.footer || '';
     isRenderTypescript = swconfig.typescript || false;
     mapFileName = swconfig.mapFileName || [];
+    filterName = swconfig.filterName || {};
 
   } else if (typeof swconfig === 'string') {
     template = swconfig;
@@ -42,18 +47,39 @@ function renderTpl(swconfig, swaggerFile) {
   definitions = swaggerFile.definitions;
 
   // 1.  先遍历所有tags
-  const tagsArr = swaggerFile.tags.map((item, index) => {
+  let tagsArr = swaggerFile.tags.map((item, index) => {
     let CasePath =  (mapFileName[index] ? mapFileName[index] : item.description.replace(/\s(\w)/g, ($1, $2) => $2.toUpperCase()))
     return ({
     ...item,
     filePath: `${outputPath}/${isRenderTypescript?CasePath+'/index':CasePath}.${isRenderTypescript?'ts':'js'}`,
-    tsTypePath:`${outputPath}/${CasePath+'/types'}.ts`,
-    casePath:isRenderTypescript? CasePath:'', // 判断是否ts模式
+    tsTypePath:`${outputPath}/${CasePath+'/types'}.ts`, // 判断是否ts模式
+    casePath:CasePath, 
+    isAxiosTypes:isAxiosTypes,
     isTypescript:isRenderTypescript,
     tsTypeTempArr:[], // tsType引入的数组
     tsReturnTypeArr:[], // ts返回值数组
     children: [],
   })});
+
+  if(Reflect.ownKeys(filterName).length){
+    tagsArr = Reflect.ownKeys(filterName).reduce((pre,key,idx)=>{
+        if(tagsArr[key]){
+         let tempItem = tagsArr[key]
+        //  .match(/.*\/(.*?)\/index.ts/)
+         tempItem.tsTypePath = tempItem.tsTypePath.replace(tempItem.casePath,filterName[key])
+         tempItem.filePath = tempItem.filePath.replace(tempItem.casePath,filterName[key])
+         tempItem.casePath = filterName[key]
+          pre.push(tempItem)
+        return pre
+        }else{
+          return pre
+        }
+    },[])
+  }
+
+  // tagsArr = tagsArr.map(item=>{
+      
+  // })
 
   // 2.遍历所有path然后分类
   Object.keys(swaggerFile.paths).forEach((path) => {
@@ -89,7 +115,10 @@ function renderTpl(swconfig, swaggerFile) {
     renderStr += headerMsgTpl;
     // 如果是ts模式的话 首先需要添加渲染模板的标记, 然后添加所有类型名称到一个数据结构，后续需要筛选再渲染到 tsimportTpl 上
     if(item.isTypescript){
-      renderStr+=`import {AxiosResponse} from 'axios'\r\n`
+      if(item.isAxiosTypes){
+        renderStr+=`import {AxiosResponse} from 'axios'\r\n`
+      }
+
       renderStr += `{{tsimportTpl}}
       `
       item.children.forEach((pathObj) => {
@@ -108,9 +137,11 @@ function renderTpl(swconfig, swaggerFile) {
       Object.keys(pathObj).forEach((typeKey,) => {
         if (pathKeyArr.includes(typeKey)) {
           if (pathObj[typeKey]) {
-
-            if(isRenderTypescript){
+            // 是否isAxiosTypes
+            if(isRenderTypescript && item.isAxiosTypes){
                tempTpl.replace(/\(\{\{params\}\}\)/g,`({{params}}):Promise<AxiosResponse<${item.tsReturnTypeArr[idx]}>>`)
+            }else if(!item.isAxiosTypes && isRenderTypescript){
+              tempTpl.replace(/\(\{\{params\}\}\)/g,`({{params}}):Promise<${item.tsReturnTypeArr[idx]}>`)
             }
 
             // 渲染基本注释
@@ -147,7 +178,6 @@ function renderTpl(swconfig, swaggerFile) {
         }
       });
     });
-
     const exit = fs.existsSync(`${outputPath}`);
 
     if (!exit) {

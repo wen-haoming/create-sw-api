@@ -48,6 +48,8 @@ const defaultAction = async (args = []) => {
   // 如果用户填入配置文件的路径则走默认文件名 /sw.config.js
   if (filePath) {
     filePath = process.cwd() + "/" + filePath;
+  }else{
+    filePath = process.cwd() + "/sw.config.js";
   }
   let swConfig = require(filePath);
 
