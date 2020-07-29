@@ -46,7 +46,7 @@ Options:
 
 2. 配置文件编写
 
-```json
+```js
 // 定义模板
 let tpl = ` export const {{apiname}} = ({{params}}) => request('{{url}}', {{{query}}}, {
   method: '{{method}}',
@@ -65,7 +65,7 @@ module.exports = {
 
 3. ** **配置package.json里面script的字段 比如:  
 
-```json
+```js
 "scripts": {
     "api":"sw-api " // or  "api": "sw-api --config xxx.js" 执行指定对应配置文件
   },
